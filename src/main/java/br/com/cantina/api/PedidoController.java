@@ -31,12 +31,12 @@ public class PedidoController {
 
     @GetMapping
     public List<PedidoResposta> listar() {
-        throw new UnsupportedOperationException("TODO");
+        return pedidos.listar().stream().map(PedidoResposta::new).toList();
     }
 
     @GetMapping("/{id}")
     public PedidoResposta buscar(@PathVariable int id) {
-        throw new UnsupportedOperationException("TODO");
+        return new PedidoResposta(pedidos.buscar(id));
     }
 
     @PostMapping

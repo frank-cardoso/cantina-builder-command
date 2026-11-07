@@ -7,6 +7,6 @@ import br.com.cantina.cardapio.Produto;
 public record ItemPedido(Produto produto, int quantidade) {
 
     public BigDecimal subtotal() {
-        throw new UnsupportedOperationException("TODO");
+        return produto.preco().multiply(BigDecimal.valueOf(quantidade));
     }
 }

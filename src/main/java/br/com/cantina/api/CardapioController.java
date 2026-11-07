@@ -19,6 +19,6 @@ public class CardapioController {
 
     @GetMapping("/cardapio")
     public List<Produto> listar() {
-        throw new UnsupportedOperationException("TODO");
+        return cardapio.listar();
     }
 }
