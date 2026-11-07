@@ -1,25 +1,33 @@
 package br.com.cantina.pedido;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.springframework.stereotype.Component;
+
+import br.com.cantina.NaoEncontradoException;
 
 @Component
 public class PedidosEmMemoria {
 
+    private final List<Pedido> pedidos = new CopyOnWriteArrayList<>();
+
     public void adicionar(Pedido pedido) {
-        throw new UnsupportedOperationException("TODO");
+        pedidos.add(pedido);
     }
 
     public void remover(Pedido pedido) {
-        throw new UnsupportedOperationException("TODO");
+        pedidos.remove(pedido);
     }
 
     public Pedido buscar(int id) {
-        throw new UnsupportedOperationException("TODO");
+        return pedidos.stream()
+                .filter(pedido -> pedido.getId() == id)
+                .findFirst()
+                .orElseThrow(() -> new NaoEncontradoException("Pedido " + id + " não encontrado"));
     }
 
     public List<Pedido> listar() {
-        throw new UnsupportedOperationException("TODO");
+        return List.copyOf(pedidos);
     }
 }

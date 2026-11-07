@@ -20,7 +20,15 @@ public record PedidoResposta(
     }
 
     public PedidoResposta(Pedido pedido) {
-        this(0, null, List.of(), false, null, null, 0, null);
-        throw new UnsupportedOperationException("TODO");
+        this(pedido.getId(),
+                pedido.getCliente(),
+                pedido.getItens().stream()
+                        .map(item -> new Item(item.produto().nome(), item.quantidade(), item.subtotal()))
+                        .toList(),
+                pedido.isParaViagem(),
+                pedido.getObservacao(),
+                pedido.getStatus(),
+                pedido.getDescontoPercentual(),
+                pedido.total());
     }
 }
