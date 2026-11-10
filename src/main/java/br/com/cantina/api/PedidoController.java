@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.cantina.cardapio.Cardapio;
 import br.com.cantina.comando.Balcao;
+import br.com.cantina.comando.RegistrarPedidoComando;
+import br.com.cantina.pedido.Pedido;
+import br.com.cantina.pedido.PedidoBuilder;
 import br.com.cantina.pedido.PedidosEmMemoria;
 
 @RestController
@@ -42,6 +45,20 @@ public class PedidoController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public PedidoResposta criar(@RequestBody NovoPedidoRequisicao requisicao) {
-        throw new UnsupportedOperationException("TODO");
+        PedidoBuilder builder = new PedidoBuilder()
+                .paraCliente(requisicao.cliente())
+                .comObservacao(requisicao.observacao());
+        if (requisicao.paraViagem()) {
+            builder.paraViagem();
+        }
+        if (requisicao.itens() != null) {
+            for (NovoPedidoRequisicao.Item item : requisicao.itens()) {
+                builder.adicionarItem(cardapio.buscar(item.produtoId()), item.quantidade());
+            }
+        }
+        Pedido pedido = builder.build();
+
+        balcao.executar(new RegistrarPedidoComando(pedido, pedidos));
+        return new PedidoResposta(pedido);
     }
 }
