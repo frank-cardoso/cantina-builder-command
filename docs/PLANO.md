@@ -353,7 +353,7 @@ Cancelar é um `POST /cancelamento`, não um `DELETE`, porque cancelar pode ser 
 
 ### Frente B: Builder
 
-**Responsável:** Alexandre Tibes (@________)  ·  **branch:** `feature/builder`  ·  **situação:** mergeada no PR #2 (10/11)
+**Responsável:** Alexandre Tibes (@Xandetds)  ·  **branch:** `feature/builder`  ·  **situação:** mergeada no PR #2 (10/11)
 
 - **Toca:**
   - `PedidoBuilder`
@@ -416,7 +416,9 @@ Cancelar é um `POST /cancelamento`, não um `DELETE`, porque cancelar pode ser 
   - o parágrafo do pattern que a pessoa fez;
   - a declaração de IA (modelo e onde usou);
   - a contribuição.
-- **No README, inclui também** uma seção **"Como estender"**, pensando na Parte 2 (ver seção 11).
+- **No README, inclui também** uma seção **"Como estender"**, com os arquivos de cada extensão:
+  - novo passo de montagem: método no `PedidoBuilder`, campo no `Pedido`, em `NovoPedidoRequisicao` e `PedidoResposta`, e no formulário;
+  - novo comando: classe que implementa `Comando`, endpoint no `BalcaoController` e botão na tela (o `Balcao` não muda).
 - **Quinta:** faz o teste final "clonar do zero e rodar" numa máquina que ainda não tinha o projeto.
 
 ---
@@ -449,34 +451,9 @@ Depois do primeiro push, confira no GitHub se o commit aparece com **o seu avata
 3. `./mvnw test` passando antes de abrir o PR.
 4. Abrir o PR para a `main`. **Outra pessoa do grupo revisa e aprova.** Ninguém commita direto na `main`.
 
-Revisar o PR uns dos outros já é treino para a Parte 3, quando a gente revisa o PR da equipe extensora.
-
 ---
 
-## 11. Pensando na Parte 2 e na Parte 3
-
-**Na Parte 2, outra equipe vai estender o nosso projeto** com "um novo passo de montagem" e "um novo comando". O projeto precisa deixar esse caminho óbvio:
-
-- **Novo passo de montagem:**
-  - método novo no `PedidoBuilder`;
-  - campo novo no `Pedido`;
-  - campo em `NovoPedidoRequisicao` e `PedidoResposta`;
-  - campo no formulário.
-- **Novo comando:**
-  - classe nova implementando `Comando`;
-  - endpoint em `BalcaoController`;
-  - botão na tela.
-  - O `Balcao` não muda.
-- **Testes** garantem que a extensão não quebrou nada, e o enunciado exige que a aplicação continue funcionando.
-- **A seção "Como estender" do README** aponta exatamente esses arquivos.
-
-**Na Parte 3, a gente revisa o PR deles:** comentário geral + comentários em linhas específicas, e todo mundo participa. Divisão natural: cada um revisa o que mexeu na sua frente (A no domínio, B no builder, C nos comandos, D na tela e no README).
-
-**Na nossa própria Parte 2, vamos estender o projeto de outra equipe SEM IA.** O tema que cair pode ter Factory Method, Observer, Strategy, Decorator, State ou Composite. Vale cada um entender de verdade o pattern que fez agora e dar uma estudada nos outros.
-
----
-
-## 12. Armadilhas que tiram nota
+## 11. Armadilhas que tiram nota
 
 - **Pattern a mais.** Nada de:
   - `getInstance()` (Singleton);
@@ -493,7 +470,7 @@ Revisar o PR uns dos outros já é treino para a Parte 3, quando a gente revisa 
 
 ---
 
-## 13. Checklist de entrega (quinta à noite)
+## 12. Checklist de entrega (quinta à noite)
 
 - [ ] `./mvnw spring-boot:run` sobe sem erro numa máquina limpa com JDK 25
 - [ ] `./mvnw test` passa
