@@ -2,6 +2,8 @@
 
 Plano da **Parte 1** (aplicação base). Entrega: **sexta, 13/11/2026**.
 
+Escopo inicial e plano: Frank Cardoso (@frank-cardoso).
+
 ---
 
 ## 1. Resumo
@@ -323,6 +325,8 @@ Cancelar é um `POST /cancelamento`, não um `DELETE`, porque cancelar pode ser 
 
 ### Passo 0: esqueleto (responsável pelo repo, até domingo 08/11)
 
+**Responsável:** Frank Cardoso (@frank-cardoso)  ·  **situação:** concluído (07/11)
+
 1. Criar o repo **público** (sugestão de nome: `cantina-builder-command`).
 2. Gerar o projeto no start.spring.io com: Maven, Java 25, Spring Boot 4.1.x, group `br.com.cantina`, artifact `cantina`, dependência **Spring Web**. Depois, adicionar o springdoc 3.2.0 no `pom.xml`.
 3. Criar todas as classes da seção 7 com o corpo `TODO`, e conferir que `./mvnw test` compila.
@@ -332,7 +336,7 @@ Cancelar é um `POST /cancelamento`, não um `DELETE`, porque cancelar pode ser 
 
 ### Frente A: domínio, cardápio e consultas
 
-**Responsável:** ____________ (@________)  ·  **branch:** `feature/dominio`
+**Responsável:** Frank Cardoso (@frank-cardoso)  ·  **branch:** `feature/dominio`  ·  **situação:** mergeada no PR #1 (07/11)
 
 - **Toca:**
   - `NaoEncontradoException`
@@ -349,7 +353,7 @@ Cancelar é um `POST /cancelamento`, não um `DELETE`, porque cancelar pode ser 
 
 ### Frente B: Builder
 
-**Responsável:** ____________ (@________)  ·  **branch:** `feature/builder`
+**Responsável:** Alexandre Tibes (@________)  ·  **branch:** `feature/builder`  ·  **situação:** mergeada no PR #2 (10/11)
 
 - **Toca:**
   - `PedidoBuilder`
