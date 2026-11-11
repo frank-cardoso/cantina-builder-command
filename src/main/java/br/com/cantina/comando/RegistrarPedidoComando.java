@@ -4,23 +4,26 @@ import br.com.cantina.pedido.Pedido;
 import br.com.cantina.pedido.PedidosEmMemoria;
 
 public class RegistrarPedidoComando implements Comando {
+    private final Pedido pedido;
+    private final PedidosEmMemoria pedidos;
 
     public RegistrarPedidoComando(Pedido pedido, PedidosEmMemoria pedidos) {
-        throw new UnsupportedOperationException("TODO");
+        this.pedido = pedido;
+        this.pedidos = pedidos;
     }
 
     @Override
     public void executar() {
-        throw new UnsupportedOperationException("TODO");
+        pedidos.adicionar(pedido);
     }
 
     @Override
     public void desfazer() {
-        throw new UnsupportedOperationException("TODO");
+        pedidos.remover(pedido);
     }
 
     @Override
     public String descricao() {
-        throw new UnsupportedOperationException("TODO");
+        return "Registrar pedido #" + pedido.getId();
     }
 }
