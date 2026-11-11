@@ -1,25 +1,30 @@
 package br.com.cantina.comando;
 
 import br.com.cantina.pedido.Pedido;
+import br.com.cantina.pedido.StatusPedido;
 
 public class EntregarPedidoComando implements Comando {
+    private final Pedido pedido;
 
     public EntregarPedidoComando(Pedido pedido) {
-        throw new UnsupportedOperationException("TODO");
+        this.pedido = pedido;
     }
 
     @Override
     public void executar() {
-        throw new UnsupportedOperationException("TODO");
+        if (pedido.getStatus() != StatusPedido.PRONTO) {
+            throw new IllegalStateException("Só pedidos prontos podem ser entregues.");
+        }
+        pedido.alterarStatus(StatusPedido.ENTREGUE);
     }
 
     @Override
     public void desfazer() {
-        throw new UnsupportedOperationException("TODO");
+        pedido.alterarStatus(StatusPedido.PRONTO);
     }
 
     @Override
     public String descricao() {
-        throw new UnsupportedOperationException("TODO");
+        return "Entregar pedido #" + pedido.getId();
     }
 }

@@ -1,55 +1,60 @@
 package br.com.cantina.api;
 
+import br.com.cantina.comando.*;
+import br.com.cantina.pedido.Pedido;
+import br.com.cantina.pedido.PedidosEmMemoria;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-
-import br.com.cantina.comando.Balcao;
-import br.com.cantina.pedido.PedidosEmMemoria;
 
 @RestController
 public class BalcaoController {
 
-    private final PedidosEmMemoria pedidos;
     private final Balcao balcao;
+    private final PedidosEmMemoria pedidos;
 
-    public BalcaoController(PedidosEmMemoria pedidos, Balcao balcao) {
-        this.pedidos = pedidos;
+    public BalcaoController(Balcao balcao, PedidosEmMemoria pedidos) {
         this.balcao = balcao;
+        this.pedidos = pedidos;
     }
 
     @PostMapping("/pedidos/{id}/desconto")
     public PedidoResposta aplicarDesconto(@PathVariable int id, @RequestBody DescontoRequisicao requisicao) {
-        throw new UnsupportedOperationException("TODO");
+        Pedido pedido = pedidos.buscar(id);
+        balcao.executar(new AplicarDescontoComando(pedido, requisicao.percentual()));
+        return new PedidoResposta(pedido);
     }
 
     @PostMapping("/pedidos/{id}/pronto")
     public PedidoResposta marcarPronto(@PathVariable int id) {
-        throw new UnsupportedOperationException("TODO");
+        Pedido pedido = pedidos.buscar(id);
+        balcao.executar(new MarcarProntoComando(pedido));
+        return new PedidoResposta(pedido);
     }
 
     @PostMapping("/pedidos/{id}/entrega")
-    public PedidoResposta entregar(@PathVariable int id) {
-        throw new UnsupportedOperationException("TODO");
+    public PedidoResposta entregarPedido(@PathVariable int id) {
+        Pedido pedido = pedidos.buscar(id);
+        balcao.executar(new EntregarPedidoComando(pedido));
+        return new PedidoResposta(pedido);
     }
 
     @PostMapping("/pedidos/{id}/cancelamento")
-    public PedidoResposta cancelar(@PathVariable int id) {
-        throw new UnsupportedOperationException("TODO");
+    public PedidoResposta cancelarPedido(@PathVariable int id) {
+        Pedido pedido = pedidos.buscar(id);
+        balcao.executar(new CancelarPedidoComando(pedido));
+        return new PedidoResposta(pedido);
     }
 
     @PostMapping("/balcao/desfazer")
     public Map<String, String> desfazer() {
-        throw new UnsupportedOperationException("TODO");
+        String descricao = balcao.desfazer();
+        return Map.of("desfeito", descricao);
     }
 
     @GetMapping("/balcao/historico")
     public List<String> historico() {
-        throw new UnsupportedOperationException("TODO");
+        return balcao.historico();
     }
 }

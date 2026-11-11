@@ -1,25 +1,30 @@
 package br.com.cantina.comando;
 
 import br.com.cantina.pedido.Pedido;
+import br.com.cantina.pedido.StatusPedido;
 
 public class MarcarProntoComando implements Comando {
+    private final Pedido pedido;
 
     public MarcarProntoComando(Pedido pedido) {
-        throw new UnsupportedOperationException("TODO");
+        this.pedido = pedido;
     }
 
     @Override
     public void executar() {
-        throw new UnsupportedOperationException("TODO");
+        if (pedido.getStatus() != StatusPedido.RECEBIDO) {
+            throw new IllegalStateException("Só pedidos recebidos podem ser marcados como prontos.");
+        }
+        pedido.alterarStatus(StatusPedido.PRONTO);
     }
 
     @Override
     public void desfazer() {
-        throw new UnsupportedOperationException("TODO");
+        pedido.alterarStatus(StatusPedido.RECEBIDO);
     }
 
     @Override
     public String descricao() {
-        throw new UnsupportedOperationException("TODO");
+        return "Marcar pedido #" + pedido.getId() + " como pronto";
     }
 }
