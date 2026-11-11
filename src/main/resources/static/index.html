@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f5ee">
+  <meta name="description" content="Monte pedidos e acompanhe o atendimento da cantina.">
+  <title>Cantina · Balcão de atendimento</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='14' fill='%2323362d'/%3E%3Ctext x='24' y='34' text-anchor='middle' font-size='34' font-family='serif' fill='%23f7f5ee'%3Ec%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#novo-pedido">Ir para novo pedido</a>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="Cantina, início"><span class="brand-mark" aria-hidden="true">c.</span><span>cantina<span class="brand-caption">FEITA PARA SERVIR BEM</span></span></a>
+    <div class="header-links"><span class="memory-note"><span aria-hidden="true"></span>Dados em memória</span><a href="swagger-ui.html">Abrir Swagger <span aria-hidden="true">↗</span></a></div>
+  </header>
+
+  <main class="page">
+    <div class="page-heading">
+      <div><p class="eyebrow">DO PRIMEIRO ITEM À ÚLTIMA ENTREGA</p><h1>Balcão de atendimento<span>.</span></h1><p class="intro">Monte um pedido, acompanhe a fila e cuide de cada entrega.</p></div>
+      <button id="atualizar" class="button button-outline" type="button"><span aria-hidden="true">↻</span> Atualizar balcão</button>
+    </div>
+
+    <div id="mensagem" class="message" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+
+    <div class="workspace">
+      <section class="panel composer" aria-labelledby="novo-pedido">
+        <div class="section-heading"><div><p class="eyebrow">VAMOS COMEÇAR</p><h2 id="novo-pedido" tabindex="-1">Novo pedido</h2></div><span class="section-number" aria-hidden="true">01</span></div>
+        <form id="pedido-form" novalidate>
+          <div class="field"><label for="cliente">Nome do cliente</label><input id="cliente" name="cliente" type="text" autocomplete="off" placeholder="Quem vai pedir hoje?"></div>
+          <div class="menu-heading"><h3>Escolha no cardápio</h3><span>QTD.</span></div>
+          <p class="field-hint" id="quantidade-ajuda">Deixe em branco os produtos que não entram no pedido.</p>
+          <div id="cardapio" aria-live="polite" aria-busy="true"><p class="loading">Carregando cardápio…</p></div>
+          <div class="order-options">
+            <label class="checkbox-label" for="para-viagem"><input id="para-viagem" name="paraViagem" type="checkbox"><span>Para viagem</span><span class="option-note">Pode embalar!</span></label>
+            <div class="field"><label for="observacao">Alguma observação? <span class="optional">Opcional</span></label><textarea id="observacao" name="observacao" rows="2" placeholder="Ex.: suco sem açúcar"></textarea><p class="field-hint">Até 100 caracteres. A cantina confirma os detalhes do pedido.</p></div>
+          </div>
+          <button type="submit" class="button button-primary submit-order">Montar pedido <span aria-hidden="true">→</span></button>
+          <p class="composer-note">O total aparece no pedido depois de montado.</p>
+        </form>
+      </section>
+
+      <div class="counter-column">
+        <section class="panel orders-panel" aria-labelledby="pedidos-titulo">
+          <div class="section-heading"><div><p class="eyebrow">CADA PEDIDO TEM SUA VEZ</p><h2 id="pedidos-titulo">Pedidos <span id="pedidos-contagem" class="count" aria-label="Quantidade de pedidos">—</span></h2></div><span class="section-number" aria-hidden="true">02</span></div>
+          <div id="pedidos" class="order-list" aria-live="polite" aria-busy="true"><p class="loading">Carregando pedidos…</p></div>
+        </section>
+
+        <section class="panel history-panel" aria-labelledby="historico-titulo">
+          <div class="section-heading history-heading"><div><p class="eyebrow">UM PASSO DE CADA VEZ</p><h2 id="historico-titulo">Histórico do balcão</h2></div><span class="section-number" aria-hidden="true">03</span></div>
+          <div class="undo-row"><p>Fez algo sem querer?<br><span>Desfaça a última ação do balcão.</span></p><button id="desfazer" type="button" class="button button-outline"><span aria-hidden="true">↶</span> Desfazer última ação</button></div>
+          <div id="historico" aria-live="polite" aria-busy="true"><p class="loading">Carregando histórico…</p></div>
+        </section>
+      </div>
+    </div>
+    <footer class="page-footer"><span>cantina <span aria-hidden="true">/</span> um pedido de cada vez.</span><span>Os dados são apagados ao reiniciar a aplicação.</span></footer>
+  </main>
+
+  <template id="produto-template">
+    <div class="product-row"><div><label class="product-name"></label><p><span class="product-price"></span><span class="product-category"></span></p></div><input class="quantity-input" type="number" step="1" inputmode="numeric" placeholder="—" aria-describedby="quantidade-ajuda"></div>
+  </template>
+
+  <template id="pedido-template">
+    <article class="order-card">
+      <div class="order-heading"><div><span class="order-id"></span><h3 class="order-client"></h3></div><span class="status-badge"></span></div>
+      <p class="order-service"></p>
+      <ul class="order-items"></ul>
+      <p class="order-observation" hidden></p>
+      <div class="order-total"><span>Total <small class="order-discount"></small></span><strong></strong></div>
+      <div class="order-actions">
+        <form class="discount-form" novalidate><label class="sr-only">Percentual de desconto</label><div class="percentage-field"><input name="percentual" type="number" step="1" inputmode="numeric" value="10"><span aria-hidden="true">%</span></div><button class="button button-soft" type="submit">Desconto</button></form>
+        <div class="state-actions"><button class="button button-soft" type="button" data-action="pronto">Pronto</button><button class="button button-deliver" type="button" data-action="entrega">Entregar <span aria-hidden="true">↗</span></button><button class="button button-cancel" type="button" data-action="cancelamento">Cancelar</button></div>
+      </div>
+    </article>
+  </template>
+</body>
+</html>
