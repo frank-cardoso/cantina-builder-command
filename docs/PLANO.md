@@ -382,7 +382,7 @@ Cancelar é um `POST /cancelamento`, não um `DELETE`, porque cancelar pode ser 
 
 ### Frente C: Command
 
-**Responsável:** ____________ (@________)  ·  **branch:** `feature/command`
+**Responsável:** Gustavo Nunes Teixeira (@ogustavonunes)  ·  **branch:** `feature/command`  ·  **situação:** mergeada no PR #4 (11/11)
 
 - **Toca:**
   - `comando/*`: `Comando`, `Balcao` e os 5 comandos, seguindo a tabela de regras da seção 7
@@ -399,7 +399,7 @@ Cancelar é um `POST /cancelamento`, não um `DELETE`, porque cancelar pode ser 
 
 ### Frente D: front + README
 
-**Responsável:** ____________ (@________)  ·  **branch:** `feature/front-readme`
+**Responsável:** Iuri de Lima Marques (@iurilmarques)  ·  **branch:** `feature/front-readme`  ·  **situação:** mergeada no PR #5 (11/11)
 
 - **Toca:** `static/index.html`, `app.js`, `style.css` e o `README.md`.
 - **Tela (uma página só):**

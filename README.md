@@ -44,14 +44,6 @@ Para executar os testes:
 # Windows: .\mvnw.cmd test
 ```
 
-### Estado de integração
-
-- **Frentes A e B:** domínio, cardápio, consultas e Builder implementados.
-- **Frente D:** tela conectada aos endpoints reais e documentação implementadas nesta branch.
-- **Frente C:** comandos e `BalcaoController` ainda contêm `TODO` na base desta branch. Até essa frente ser integrada, criar um pedido válido e usar ações ou histórico do balcão resulta em erro no servidor. A tela exibe as falhas e mantém as seções que conseguir carregar.
-
-O fluxo completo descrito abaixo depende da integração da Frente C. A tela não simula resultados nem aplica regras para compensar endpoints pendentes.
-
 ## Como usar
 
 ### Pela tela
@@ -68,13 +60,11 @@ Todos os botões de ação aparecem em todos os status. O JavaScript apenas envi
 
 ### Roteiro de demonstração
 
-Após integrar a Frente C:
-
 1. Monte um pedido para **Ana**, com **2 pães de queijo** e **1 suco natural**, para viagem, com a observação **suco sem açúcar**. O total deve ser **R$ 17,00**, com status `RECEBIDO`.
 2. Aplique **10%** de desconto. O total deve passar para **R$ 15,30**.
 3. Clique em **Desfazer última ação**. O desconto volta a 0% e o total a **R$ 17,00**.
 4. Clique em **Pronto** e depois em **Entregar**. O pedido passa por `PRONTO` até `ENTREGUE`.
-5. Tente **Cancelar** o pedido entregue. A tela deve mostrar a mensagem da API: **Pedido entregue não pode ser cancelado**.
+5. Tente **Cancelar** o pedido entregue. A tela deve mostrar a mensagem da API: **Pedido entregue ou já cancelado não pode ser cancelado.**.
 
 O número do pedido é gerado pelo servidor e pode variar; não é necessário que ele seja `#1`.
 
@@ -88,7 +78,7 @@ curl -i -X POST http://localhost:8080/pedidos \
   -d '{"cliente":"Ana","itens":[{"produtoId":1,"quantidade":2},{"produtoId":5,"quantidade":1}],"paraViagem":true,"observacao":"suco sem açúcar"}'
 ```
 
-Após a integração da Frente C, a resposta é `201 Created`, com o pedido criado. Use o `id` retornado no lugar de `1` nos exemplos seguintes:
+A resposta é `201 Created`, com o pedido criado. Use o `id` retornado no lugar de `1` nos exemplos seguintes:
 
 ```bash
 curl -X POST http://localhost:8080/pedidos/1/desconto \
@@ -150,7 +140,7 @@ O `build()` recusa cliente ausente ou vazio, pedido sem itens, produto nulo, qua
 
 **Problema.** Registrar, aplicar desconto, marcar pronto, entregar e cancelar precisam ter histórico e poder ser desfeitos. Colocar a lógica de reversão nos controllers mistura transporte HTTP com regras de negócio.
 
-**Solução prevista para a Frente C.** Cada ação é um objeto que implementa `Comando`, com `executar()`, `desfazer()` e `descricao()`. O `Balcao` executa e guarda os comandos bem-sucedidos em ordem; desfazer reverte o mais recente. Cada comando guarda o estado anterior necessário à própria reversão. O frontend chama o endpoint correspondente e atualiza os dados pela API.
+**Solução.** Cada ação é um objeto que implementa `Comando`, com `executar()`, `desfazer()` e `descricao()`. O `Balcao` executa e guarda os comandos bem-sucedidos em ordem; desfazer reverte o mais recente. Cada comando guarda o estado anterior necessário à própria reversão. O frontend chama o endpoint correspondente e atualiza os dados pela API.
 
 **Classes envolvidas:**
 
@@ -160,7 +150,17 @@ O `build()` recusa cliente ausente ou vazio, pedido sem itens, produto nulo, qua
 - `pedido/Pedido` e `pedido/PedidosEmMemoria`: objetos alterados pelas ações.
 - `api/PedidoController` e `api/BalcaoController`: recebem as solicitações e acionam os comandos.
 
-As regras e reversões de cada comando estão na seção 7 do [plano](docs/PLANO.md). Esta seção descreve o contrato; a implementação da Frente C ainda está pendente na base desta branch.
+| Comando | Só executa quando | Desfazer |
+| --- | --- | --- |
+| `RegistrarPedidoComando` | sempre | remove o pedido da lista |
+| `AplicarDescontoComando` | status `RECEBIDO` e desconto de 1% a 50% | volta o desconto anterior |
+| `MarcarProntoComando` | status `RECEBIDO` | volta para `RECEBIDO` |
+| `EntregarPedidoComando` | status `PRONTO` | volta para `PRONTO` |
+| `CancelarPedidoComando` | status `RECEBIDO` ou `PRONTO` | volta o status anterior |
+
+Quando a pré-condição falha, o comando lança exceção, não entra no histórico e a API devolve 400 com a mensagem. Desfazer com o histórico vazio também devolve 400.
+
+**Testes existentes:** `ComandosTest` (execução, reversão e recusa de cada comando) e `BalcaoTest` (ordem inversa ao desfazer, histórico vazio e comando que falhou fora do histórico).
 
 ## Como estender
 
@@ -190,8 +190,8 @@ Conforme as declarações já registradas no projeto:
 | --- | --- | --- |
 | Frank Cardoso | Claude Opus 5.5, Anthropic | Plano da Parte 1, esqueleto do projeto, Frente A e documentação inicial |
 | Alexandre Tibes | Claude Opus 5.5, Anthropic | Frente B: `PedidoBuilder`, `POST /pedidos`, testes e documentação do Builder |
-| @iurilimamarques | Codex, OpenAI, agente baseado em GPT-6 | Frente D: HTML, CSS, JavaScript integrado à API, README e verificações do frontend |
-| Responsável pela Frente C, a confirmar | A confirmar pelo integrante | Preencher com o modelo e os usos efetivos ao integrar a Frente C |
+| Iuri de Lima Marques | Codex, OpenAI, agente baseado em GPT-6 | Frente D: HTML, CSS, JavaScript integrado à API, README e verificações do frontend |
+| Gustavo Nunes Teixeira | Gemini Pro, Google | Frente C: comandos, balcão e testes |
 
 ## Contribuições
 
@@ -199,18 +199,5 @@ Conforme as declarações já registradas no projeto:
 | --- | --- | --- |
 | Frank Cardoso | [@frank-cardoso](https://github.com/frank-cardoso) | Escopo, plano, esqueleto e Frente A: domínio, cardápio, consultas e testes |
 | Alexandre Tibes | [@Xandetds](https://github.com/Xandetds) | Frente B: Builder, criação de pedidos pela API e testes |
-| @iurilimamarques | [@iurilimamarques](https://github.com/iurilimamarques) | Frente D: interface responsiva servida pelo Spring Boot, integração com a API e README |
-| A confirmar | A confirmar | Frente C: comandos, balcão e testes correspondentes |
-
-Os dados da Frente C devem ser preenchidos pelo integrante responsável. Cada participante deve ter commits com a própria conta, conforme o enunciado.
-
-## Verificação da entrega
-
-Antes da entrega, com a Frente C integrada:
-
-- Execute `./mvnw test`.
-- Em uma máquina que ainda não tenha o projeto, clone o repositório, configure o JDK 25 e execute `./mvnw spring-boot:run`.
-- Percorra o roteiro de demonstração pela tela, incluindo desfazer e o erro ao tentar cancelar um pedido entregue.
-- Confira as contribuições, as declarações de IA e os commits dos quatro integrantes.
-
-O teste em uma máquina limpa e o roteiro completo de integração precisam ser executados antes da entrega; não são presumidos como concluídos por esta documentação.
+| Iuri de Lima Marques | [@iurilmarques](https://github.com/iurilmarques) | Frente D: interface responsiva servida pelo Spring Boot, integração com a API e README |
+| Gustavo Nunes Teixeira | [@ogustavonunes](https://github.com/ogustavonunes) | Frente C: comandos, balcão, endpoints do balcão e testes |
