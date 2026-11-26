@@ -50,7 +50,21 @@
 
         <section class="panel history-panel" aria-labelledby="historico-titulo">
           <div class="section-heading history-heading"><div><p class="eyebrow">UM PASSO DE CADA VEZ</p><h2 id="historico-titulo">Histórico do balcão</h2></div><span class="section-number" aria-hidden="true">03</span></div>
-          <div class="undo-row"><p>Fez algo sem querer?<br><span>Desfaça a última ação do balcão.</span></p><button id="desfazer" type="button" class="button button-outline"><span aria-hidden="true">↶</span> Desfazer última ação</button></div>
+          <div class="undo-row">
+              <p>
+                  Fez algo sem querer?
+                  <br/>
+                  <span>Desfaça a última ação do balcão ou refaça o que foi desfeito.</span>
+              </p>
+              <div class="undo-buttons">
+                  <button id="desfazer" type="button" class="button button-outline">
+                      <span aria-hidden="true">↶</span>
+                      Desfazer última ação
+                  </button>
+                  <button id="refazer" type="button" class="button button-outline">
+                      <span aria-hidden="true">↷</span> Refazer</button>
+              </div>
+          </div>
           <div id="historico" aria-live="polite" aria-busy="true"><p class="loading">Carregando histórico…</p></div>
         </section>
       </div>
@@ -71,7 +85,16 @@
       <div class="order-total"><span>Total <small class="order-discount"></small></span><strong></strong></div>
       <div class="order-actions">
         <form class="discount-form" novalidate><label class="sr-only">Percentual de desconto</label><div class="percentage-field"><input name="percentual" type="number" step="1" inputmode="numeric" value="10"><span aria-hidden="true">%</span></div><button class="button button-soft" type="submit">Desconto</button></form>
-        <div class="state-actions"><button class="button button-soft" type="button" data-action="pronto">Pronto</button><button class="button button-deliver" type="button" data-action="entrega">Entregar <span aria-hidden="true">↗</span></button><button class="button button-cancel" type="button" data-action="cancelamento">Cancelar</button></div>
+        <form class="item-form" novalidate><label class="sr-only item-produto-label">Item do pedido</label><select name="produtoId" class="item-select"></select><label class="sr-only item-quantidade-label">Nova quantidade</label><div class="percentage-field"><input name="quantidade" type="number" step="1" min="1" inputmode="numeric" value="1"><span aria-hidden="true">un.</span></div><button class="button button-soft" type="submit">Alterar item</button></form>
+        <div class="state-actions">
+            <button class="button button-soft" type="button" data-action="pronto">Pronto</button>
+            <button class="button button-deliver" type="button" data-action="entrega">
+                Entregar <span aria-hidden="true">↗</span>
+            </button>
+            <button class="button button-deliver" type="button" data-action="finalizacao">Finalizar</button>
+            <button class="button button-cancel" type="button" data-action="cancelamento">Cancelar</button>
+            <button class="button button-soft" type="button" data-action="repeticao">Repetir</button>
+        </div>
       </div>
     </article>
   </template>
