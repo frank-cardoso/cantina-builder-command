@@ -96,4 +96,24 @@ class ComandosTest {
         new EntregarPedidoComando(pedido).executar();
         assertThrows(IllegalStateException.class, () -> new CancelarPedidoComando(pedido).executar());
     }
+
+    @Test
+    void alterarQuantidadeItem() {
+        Comando cmd = new AlterarQuantidadeItemComando(pedido, 1, 3);
+        cmd.executar();
+        assertEquals(3, pedido.quantidadeDe(1));
+        assertEquals(new BigDecimal("10.50"), pedido.total());
+        cmd.desfazer();
+        assertEquals(1, pedido.quantidadeDe(1));
+        assertEquals(new BigDecimal("3.50"), pedido.total());
+    }
+
+    @Test
+    void alterarQuantidadeItemInvalido() {
+        assertThrows(IllegalArgumentException.class, () -> new AlterarQuantidadeItemComando(pedido, 1, 0).executar());
+        assertThrows(IllegalArgumentException.class, () -> new AlterarQuantidadeItemComando(pedido, 99, 2).executar());
+        new MarcarProntoComando(pedido).executar();
+        assertThrows(IllegalStateException.class, () -> new AlterarQuantidadeItemComando(pedido, 1, 2).executar());
+        assertEquals(1, pedido.quantidadeDe(1));
+    }
 }
