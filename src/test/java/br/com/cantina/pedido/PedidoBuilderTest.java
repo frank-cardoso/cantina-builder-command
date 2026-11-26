@@ -2,6 +2,7 @@ package br.com.cantina.pedido;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -103,5 +104,66 @@ class PedidoBuilderTest {
                 .build();
 
         assertEquals(100, pedido.getObservacao().length());
+    }
+
+    @Test
+    void somaQuantidadeDeProdutoRepetido() {
+        Pedido pedido = new PedidoBuilder()
+                .paraCliente("Ana")
+                .adicionarItem(PAO_DE_QUEIJO, 2)
+                .adicionarItem(SUCO_NATURAL, 1)
+                .adicionarItem(PAO_DE_QUEIJO, 3)
+                .build();
+
+        assertEquals(2, pedido.getItens().size());
+        assertEquals(5, pedido.quantidadeDe(1));
+        assertEquals(new BigDecimal("30.50"), pedido.total());
+    }
+
+    @Test
+    void montaPedidoAPartirDeOutro() {
+        Pedido original = new PedidoBuilder()
+                .paraCliente("Ana")
+                .adicionarItem(PAO_DE_QUEIJO, 2)
+                .paraViagem()
+                .comObservacao("bem quente")
+                .build();
+
+        Pedido copia = new PedidoBuilder().aPartirDe(original).build();
+
+        assertNotEquals(original.getId(), copia.getId());
+        assertEquals("Ana", copia.getCliente());
+        assertEquals(original.getItens(), copia.getItens());
+        assertTrue(copia.isParaViagem());
+        assertEquals("bem quente", copia.getObservacao());
+        assertEquals(StatusPedido.RECEBIDO, copia.getStatus());
+    }
+
+    @Test
+    void aPartirDePermiteAjustarOsPassos() {
+        Pedido original = new PedidoBuilder()
+                .paraCliente("Ana")
+                .adicionarItem(PAO_DE_QUEIJO, 2)
+                .paraViagem()
+                .build();
+
+        Pedido ajustado = new PedidoBuilder()
+                .aPartirDe(original)
+                .paraCliente("Bia")
+                .adicionarItem(PAO_DE_QUEIJO, 1)
+                .adicionarItem(SUCO_NATURAL, 1)
+                .naoParaViagem()
+                .build();
+
+        assertEquals("Bia", ajustado.getCliente());
+        assertEquals(3, ajustado.quantidadeDe(1));
+        assertEquals(1, ajustado.quantidadeDe(5));
+        assertFalse(ajustado.isParaViagem());
+        assertEquals(2, original.quantidadeDe(1));
+    }
+
+    @Test
+    void recusaPedidoDeOrigemNulo() {
+        assertThrows(IllegalArgumentException.class, () -> new PedidoBuilder().aPartirDe(null));
     }
 }
