@@ -16,14 +16,14 @@ public record PedidoResposta(
         int descontoPercentual,
         BigDecimal total) {
 
-    public record Item(String produto, int quantidade, BigDecimal subtotal) {
+    public record Item(int produtoId, String produto, int quantidade, BigDecimal subtotal) {
     }
 
     public PedidoResposta(Pedido pedido) {
         this(pedido.getId(),
                 pedido.getCliente(),
                 pedido.getItens().stream()
-                        .map(item -> new Item(item.produto().nome(), item.quantidade(), item.subtotal()))
+                        .map(item -> new Item(item.produto().id(), item.produto().nome(), item.quantidade(), item.subtotal()))
                         .toList(),
                 pedido.isParaViagem(),
                 pedido.getObservacao(),

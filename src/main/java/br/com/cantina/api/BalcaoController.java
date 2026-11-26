@@ -47,10 +47,32 @@ public class BalcaoController {
         return new PedidoResposta(pedido);
     }
 
+    @PostMapping("/pedidos/{id}/finalizacao")
+    public PedidoResposta finalizarPedido(@PathVariable int id) {
+        Pedido pedido = pedidos.buscar(id);
+        balcao.executar(MacroComando.finalizar(pedido));
+        return new PedidoResposta(pedido);
+    }
+
+    @PostMapping("/pedidos/{id}/itens/{produtoId}/quantidade")
+    public PedidoResposta alterarQuantidade(@PathVariable int id, @PathVariable int produtoId,
+            @RequestBody QuantidadeRequisicao requisicao) {
+        Pedido pedido = pedidos.buscar(id);
+        balcao.executar(new AlterarQuantidadeItemComando(pedido, produtoId, requisicao.quantidade()));
+        return new PedidoResposta(pedido);
+    }
+
     @PostMapping("/balcao/desfazer")
     public Map<String, String> desfazer() {
         String descricao = balcao.desfazer();
         return Map.of("desfeito", descricao);
+    }
+
+    @PostMapping("/balcao/refazer")
+    public Map<String, String> refazer() {
+        Comando comando = balcao.ultimoDesfeito();
+        balcao.executar(comando);
+        return Map.of("refeito", comando.descricao());
     }
 
     @GetMapping("/balcao/historico")
