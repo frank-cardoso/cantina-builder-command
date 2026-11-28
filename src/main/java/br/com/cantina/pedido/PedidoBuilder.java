@@ -20,13 +20,37 @@ public class PedidoBuilder {
         return this;
     }
 
+    public PedidoBuilder aPartirDe(Pedido modelo) {
+        if (modelo == null) {
+            throw new IllegalArgumentException("Pedido de origem não pode ser nulo");
+        }
+        this.cliente = modelo.getCliente();
+        this.itens.clear();
+        this.itens.addAll(modelo.getItens());
+        this.paraViagem = modelo.isParaViagem();
+        this.observacao = modelo.getObservacao();
+        return this;
+    }
+
     public PedidoBuilder adicionarItem(Produto produto, int quantidade) {
+        for (int i = 0; i < itens.size(); i++) {
+            ItemPedido existente = itens.get(i);
+            if (produto != null && produto.equals(existente.produto())) {
+                itens.set(i, new ItemPedido(produto, existente.quantidade() + quantidade));
+                return this;
+            }
+        }
         itens.add(new ItemPedido(produto, quantidade));
         return this;
     }
 
     public PedidoBuilder paraViagem() {
         this.paraViagem = true;
+        return this;
+    }
+
+    public PedidoBuilder naoParaViagem() {
+        this.paraViagem = false;
         return this;
     }
 

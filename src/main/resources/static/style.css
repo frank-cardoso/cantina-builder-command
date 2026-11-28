@@ -109,7 +109,9 @@ textarea { resize: vertical; min-height: 76px; }
 .order-total strong { font-size: 23px; font-weight: 650; letter-spacing: -.8px; }
 .order-discount { display: block; margin-top: 5px; font-size: 10px; color: var(--muted); }
 .order-actions { display: flex; flex-wrap: wrap; gap: 10px; padding-top: 14px; border-top: 1px solid var(--line); }
-.discount-form, .state-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.discount-form, .item-form, .state-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.item-select { border: 1px solid #d9ddcf; border-radius: 6px; padding: 7px; background: transparent; font-size: 12px; }
+.undo-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
 .state-actions { flex: 1; justify-content: flex-end; }
 .order-actions .button { font-size: 10px; padding: 9px 10px; }
 .percentage-field { display: flex; align-items: center; border: 1px solid #d9ddcf; border-radius: 6px; padding-right: 7px; }

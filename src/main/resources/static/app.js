@@ -10,6 +10,7 @@ const elements = {
   message: document.querySelector("#mensagem"),
   refresh: document.querySelector("#atualizar"),
   undo: document.querySelector("#desfazer"),
+  redo: document.querySelector("#refazer"),
 };
 
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
@@ -132,6 +133,19 @@ function renderOrders(orders) {
     discountInput.id = `desconto-${order.id}`;
     card.querySelector(".discount-form label").htmlFor = discountInput.id;
     card.querySelector(".discount-form label").textContent = `Percentual de desconto do pedido #${order.id}`;
+    const itemSelect = card.querySelector(".item-select");
+    itemSelect.id = `item-${order.id}`;
+    card.querySelector(".item-produto-label").htmlFor = itemSelect.id;
+    card.querySelector(".item-produto-label").textContent = `Item do pedido #${order.id}`;
+    order.itens.forEach((item) => {
+      const option = textElement("option", item.produto);
+      option.value = item.produtoId;
+      itemSelect.append(option);
+    });
+    const quantityInput = card.querySelector(".item-form input");
+    quantityInput.id = `quantidade-${order.id}`;
+    card.querySelector(".item-quantidade-label").htmlFor = quantityInput.id;
+    card.querySelector(".item-quantidade-label").textContent = `Nova quantidade do item do pedido #${order.id}`;
     fragment.append(card);
   });
   elements.orders.replaceChildren(fragment);
@@ -213,15 +227,31 @@ elements.orders.addEventListener("submit", (event) => {
     () => `Desconto do pedido #${id} atualizado.`);
 });
 
+elements.orders.addEventListener("submit", (event) => {
+  const form = event.target.closest(".item-form");
+  if (!form) return;
+  event.preventDefault();
+  const id = form.closest("[data-order-id]").dataset.orderId;
+  mutate(`pedidos/${id}/itens/${form.elements.produtoId.value}/quantidade`,
+    { quantidade: Number(form.elements.quantidade.value) },
+    () => `Item do pedido #${id} atualizado.`);
+});
+
 elements.orders.addEventListener("click", (event) => {
   const button = event.target.closest("[data-action]");
   if (!button) return;
   const id = button.closest("[data-order-id]").dataset.orderId;
-  mutate(`pedidos/${id}/${button.dataset.action}`, undefined, () => `Pedido #${id} atualizado.`);
+  mutate(`pedidos/${id}/${button.dataset.action}`, undefined, (order) => (order.id !== Number(id)
+    ? `Pedido #${id} repetido como #${order.id}.`
+    : `Pedido #${id} atualizado.`));
 });
 
 elements.undo.addEventListener("click", () => {
   mutate("balcao/desfazer", undefined, (data) => `Ação desfeita: ${data.desfeito}`);
+});
+
+elements.redo.addEventListener("click", () => {
+  mutate("balcao/refazer", undefined, (data) => `Ação refeita: ${data.refeito}`);
 });
 
 async function loadPage() {

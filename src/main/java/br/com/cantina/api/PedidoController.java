@@ -61,4 +61,14 @@ public class PedidoController {
         balcao.executar(new RegistrarPedidoComando(pedido, pedidos));
         return new PedidoResposta(pedido);
     }
+
+    @PostMapping("/{id}/repeticao")
+    @ResponseStatus(HttpStatus.CREATED)
+    public PedidoResposta repetir(@PathVariable int id) {
+        Pedido original = pedidos.buscar(id);
+        Pedido copia = new PedidoBuilder().aPartirDe(original).build();
+
+        balcao.executar(new RegistrarPedidoComando(copia, pedidos));
+        return new PedidoResposta(copia);
+    }
 }

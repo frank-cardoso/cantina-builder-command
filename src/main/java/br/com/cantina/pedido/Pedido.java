@@ -2,6 +2,7 @@ package br.com.cantina.pedido;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -22,7 +23,7 @@ public class Pedido {
     Pedido(String cliente, List<ItemPedido> itens, boolean paraViagem, String observacao) {
         this.id = ULTIMO_ID.incrementAndGet();
         this.cliente = cliente;
-        this.itens = List.copyOf(itens);
+        this.itens = new ArrayList<>(itens);
         this.paraViagem = paraViagem;
         this.observacao = observacao == null ? "" : observacao;
     }
@@ -36,7 +37,28 @@ public class Pedido {
     }
 
     public List<ItemPedido> getItens() {
-        return itens;
+        return List.copyOf(itens);
+    }
+
+    public int quantidadeDe(int produtoId) {
+        return itens.get(indiceDoProduto(produtoId)).quantidade();
+    }
+
+    public void alterarQuantidade(int produtoId, int quantidade) {
+        if (quantidade < 1) {
+            throw new IllegalArgumentException("Quantidade deve ser pelo menos 1");
+        }
+        int indice = indiceDoProduto(produtoId);
+        itens.set(indice, new ItemPedido(itens.get(indice).produto(), quantidade));
+    }
+
+    private int indiceDoProduto(int produtoId) {
+        for (int i = 0; i < itens.size(); i++) {
+            if (itens.get(i).produto().id() == produtoId) {
+                return i;
+            }
+        }
+        throw new IllegalArgumentException("Produto " + produtoId + " não está no pedido #" + id);
     }
 
     public boolean isParaViagem() {

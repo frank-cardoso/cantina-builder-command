@@ -101,6 +101,10 @@ curl -X POST http://localhost:8080/pedidos/1/cancelamento
 | POST | `/pedidos/{id}/cancelamento` | Cancelar, mantendo o pedido para permitir desfazer |
 | POST | `/balcao/desfazer` | Desfazer a última ação global |
 | GET | `/balcao/historico` | Consultar descrições da mais antiga para a mais nova |
+| POST | `/pedidos/{id}/repeticao` | **Parte 2:** repetir o pedido, criando um novo pelo Builder |
+| POST | `/pedidos/{id}/finalizacao` | **Parte 2:** marcar pronto e entregar em uma única ação |
+| POST | `/pedidos/{id}/itens/{produtoId}/quantidade` | **Parte 2:** alterar `{"quantidade": 3}` de um item |
+| POST | `/balcao/refazer` | **Parte 2:** refazer a última ação desfeita |
 
 Erros de validação usam HTTP 400; produtos e pedidos inexistentes usam HTTP 404. Ambos são apresentados no formato `{"erro": "mensagem"}`.
 
@@ -201,3 +205,75 @@ Conforme as declarações já registradas no projeto:
 | Alexandre Tibes | [@Xandetds](https://github.com/Xandetds) | Frente B: Builder, criação de pedidos pela API e testes |
 | Iuri de Lima Marques | [@iurilmarques](https://github.com/iurilmarques) | Frente D: interface responsiva servida pelo Spring Boot, integração com a API e README |
 | Gustavo Nunes Teixeira | [@ogustavonunes](https://github.com/ogustavonunes) | Frente C: comandos, balcão, endpoints do balcão e testes |
+
+## Parte 2 - Extensão
+
+A extensão amplia os dois patterns.
+
+### Builder - repetir pedido e itens agrupados
+
+- **`aPartirDe(Pedido modelo)`**: novo passo que pré-carrega o Builder com cliente, itens, opção para viagem e observação de um pedido existente.
+- **Itens agrupados**: chamar `adicionarItem` com um produto que já está no pedido soma a quantidade, em vez de criar uma linha duplicada.
+- **`naoParaViagem()`**: desliga a opção para viagem herdada do modelo.
+
+```java
+Pedido repetido = new PedidoBuilder()
+        .aPartirDe(pedidoDaAna)
+        .paraCliente("Bia")
+        .adicionarItem(paoDeQueijo, 1)
+        .naoParaViagem()
+        .build();
+```
+
+### Command - macro, novo comando e refazer
+
+- **`MacroComando`**: comando composto por uma lista de comandos, que entra no histórico como **uma** ação. Executa os comandos em ordem; se um falhar, desfaz os que já rodaram, em ordem inversa, e repassa o erro, então nada fica pela metade e nada entra no histórico. `desfazer()` reverte todos em ordem inversa. `MacroComando.finalizar(pedido)` combina `MarcarProntoComando` e `EntregarPedidoComando`.
+- **`AlterarQuantidadeItemComando`**: altera a quantidade de um item de um pedido `RECEBIDO` e guarda a quantidade anterior para o desfazer.
+  Recusa pedidos fora de `RECEBIDO`, quantidade menor que 1 e produto que não está no pedido.
+
+- **Refazer**: o `Balcao` guarda os comandos desfeitos e expõe o mais recente por `ultimoDesfeito()`. Refazer é utilizando o mesmo executar feito, exemplo: `balcao.executar(balcao.ultimoDesfeito())`. 
+  Como o comando guarda o pedido e os parâmetros, nada precisa ser reenviado. Uma ação nova descarta o que estava para refazer.
+
+| Comando | Só executa quando | Desfazer |
+| --- | --- | --- |
+| `MacroComando.finalizar` | status `RECEBIDO` (as duas etapas precisam valer) | volta para `RECEBIDO` |
+| `AlterarQuantidadeItemComando` | status `RECEBIDO`, quantidade ≥ 1 e produto no pedido | volta a quantidade anterior |
+
+**Classes novas ou alteradas:** `pedido/PedidoBuilder`, `pedido/Pedido` (`quantidadeDe` e `alterarQuantidade`), `comando/MacroComando`, `comando/AlterarQuantidadeItemComando`, `comando/Balcao`, `api/BalcaoController`, `api/PedidoController`, `api/QuantidadeRequisicao` e `api/PedidoResposta` (cada item passou a ter `produtoId`).
+
+### Como testar a extensão
+
+Testes automatizados: `PedidoBuilderTest` (repetição e itens agrupados), `ComandosTest` (alterar quantidade), `MacroComandoTest` (ordem, reversão e rollback), `BalcaoTest` (refazer) e `ExtensaoApiTest` (endpoints novos).
+
+```bash
+./mvnw test
+# Windows: .\mvnw.cmd test
+```
+
+Pela tela, depois de `./mvnw spring-boot:run`:
+
+1. Monte o pedido da **Ana** do roteiro de demonstração (**R$ 17,00**).
+2. No card, escolha **Pão de queijo**, informe **4** e clique em **Alterar item**. O total passa para **R$ 26,00**.
+3. Clique em **Desfazer última ação**: volta para **R$ 17,00**. Clique em **Refazer**: volta para **R$ 26,00**.
+4. Clique em **Finalizar**. O pedido vai direto para `ENTREGUE`, e o histórico mostra uma única ação, *Finalizar pedido #N (pronto + entrega)*.
+5. Clique em **Desfazer última ação**. O pedido volta para `RECEBIDO` de uma vez.
+6. Clique em **Repetir**. Aparece um novo pedido, com outro número, com os mesmos itens, observação e opção para viagem, em `RECEBIDO`.
+
+Pela API:
+
+```bash
+curl -X POST http://localhost:8080/pedidos/1/itens/1/quantidade \
+  -H 'Content-Type: application/json' -d '{"quantidade":4}'
+curl -X POST http://localhost:8080/balcao/desfazer
+curl -X POST http://localhost:8080/balcao/refazer
+curl -X POST http://localhost:8080/pedidos/1/finalizacao
+curl -i -X POST http://localhost:8080/pedidos/1/repeticao
+```
+
+### Contribuições da Parte 2
+
+O registro da equipe dona do projeto, logo abaixo, foi preservado.
+
+| Integrante | GitHub | Contribuição |
+| --- | --- | --- |
+| Luiz Arthur Barros de Carvalho | [@ArthurBCarv](https://github.com/arthurbcarv) | Builder: `aPartirDe`, itens agrupados, `naoParaViagem`, testes, Command: refazer no `Balcao`, endpoints novos, `ExtensaoApiTest`,  Command: `MacroComando` (finalizar) e `AlterarQuantidadeItemComando`, com testes, Tela (botões Finalizar, Repetir, Alterar item e Refazer) e README; abre o PR da Parte 2 |
